@@ -1,0 +1,5 @@
+Amzi! Prolog Compiler Source Code License Agreement
+
+Copyright (c) Amzi! inc. 2016, All Rights Reserved
+
+Contact Amzi! with questions about Amzi! Prolog Compiler source code licensing.

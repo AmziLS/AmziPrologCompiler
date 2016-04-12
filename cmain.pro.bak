@@ -1,0 +1,635 @@
+%-*-Prolog-*-  
+% cmain indented on 12/23/2001 by 'JOLI' 1.0.
+
+%----------------------------------------------------------------------
+%
+% cmain.pro -- the compiler shell
+%
+% Copyright (c) 1992-2002 Amzi! inc. All Rights Reserved.
+%
+% $Log: cmain.pro,v $
+% Revision 1.7  2004/01/21 19:00:40  mary
+% Fix greeting in compiler to be platform independent
+%
+% Revision 1.6  2003/12/26 18:26:14  dennis
+% some reader fixes
+%
+% Revision 1.5  2003/11/14 17:14:59  mary
+% Use LStrings properly. Don't delete them.
+%
+% Revision 1.4  2003/11/12 16:47:48  mary
+% Restructure keys to make it more maintainable. Have debug64 check license.
+%
+% Revision 1.3  2003/11/11 23:43:35  mary
+% More licensing and LAN edition tweaks.
+%
+% Revision 1.2  2003/11/02 21:49:22  mary
+% More 7.0.7 release candidate changes.
+%
+% Revision 1.1.1.1  2003/09/11 02:15:10  dennis
+% Starting release 7.0
+%
+% Revision 1.24  2003/07/24 17:30:40  dennis
+% support for debugging compiled code, reorg of alib etc to support that
+%
+% Revision 1.23  2002/07/04 16:20:25  dennis
+% support academic registration
+%
+% Revision 1.22  2002/06/10 15:10:47  dennis
+% locking working
+%
+% Revision 1.21  2002/06/09 17:32:11  dennis
+% lock dialog in IDE, created cMOD, cGOAL cTYPEs so its possible
+% to break apart :/2 structures from the IDE
+%
+% Revision 1.20  2002/06/09 03:07:57  dennis
+% added locking
+%
+% Revision 1.19  2002/05/20 04:34:11  dennis
+% final changes
+%
+% Revision 1.18  2002/05/18 23:45:37  dennis
+% makefile, unlock changes
+%
+% Revision 1.17  2002/05/15 16:59:06  dennis
+% Final fixes for last 6.1 build, 80
+%
+% Revision 1.16  2002/05/08 16:14:54  dennis
+% final a6-1-78 build, OK for chinese lsapi calls
+%
+% Revision 1.15  2002/05/05 17:29:15  dennis
+% more fixes to wcstombs, need to added ending null if string
+% didn't fit
+%
+% Revision 1.14  2002/04/25 03:42:22  dennis
+% more documentation, logicbase.htm, and some fiddling with sources
+%
+% Revision 1.13  2002/04/19 19:41:42  dennis
+% fixed retract bug with sorted/indexed clauses, implemented abolish for
+% those types as well
+%
+% Revision 1.12  2002/01/20 20:48:05  ray
+% revised real divide, printReal
+%
+% Revision 1.11 2001/11/13 00:41:18 dennis
+% updated documentation and use of .cfg and mode parameters, and
+% created an documented amzi.cfg file.
+%
+% Revision 1.10 2001/10/19 01:37:59 dennis
+% compiler bugs, still not found, but noted that X registers
+% are really restricted to 255 because of flewrite in assemb.pro,
+% should change some day.
+%
+% Revision 1.9 2001/10/13 02:58:12 dennis
+% see/tell bugs, used to close function streams
+%
+% Revision 1.8 2001/10/02 16:05:20 dennis
+% changed streams, cleaner interface to lex, reimplemented
+% readers as buffer between the two
+%
+% Revision 1.7 2001/09/11 04:34:55 dennis
+% cleaned up some io stuff, got consult working, etc.
+%
+% Revision 1.6 2001/08/29 19:34:33 ray
+% Corrections to 'seen' in alib etc.
+%
+% Revision 1.5 2001/08/01 20:17:58 ray
+% removed tswrite.cpp & sio.cpp, added streams.cpp sowrite.cpp
+%
+% Revision 1.4 2001/02/21 04:46:42 dennis
+% debugger working, updated documentation for 6.1
+%
+% Revision 1.3 2001/02/08 22:56:45 dennis
+% string bug fixes, modularized compiler and listener
+%
+% Revision 1.2 2001/01/30 16:47:28 dennis
+% Made, after many trials, alib into amzi_system module.
+%
+% Revision 1.1.1.1 2000/12/29 02:18:05 dennis
+% moved to a6
+%
+% Revision 1.15 2000/12/28 16:30:35 dennis
+% fixed nasty pets bug, true/false on CallInterp()
+% and other changes, merged with ray's new stuff
+% calling this a6-1-6
+%
+% Revision 1.14 2000/10/30 15:11:45 ray
+% Extended compiler, loader and linker for real data.
+% Added arithmetic primitives for rational data in alib.pro
+%
+% Revision 1.13 2000/10/21 03:02:42 dennis
+% temp fix of .pro.pro problem in compiler
+%
+% Revision 1.12 2000/10/01 16:20:03 dennis
+% cleaned up modules, ddb, got defined, abolish and friends working
+%
+% Revision 1.11 2000/08/26 00:32:04 dennis
+% Merged with ray's changes for new numbers and ISO standard features.
+% Added new AtomTable, Dynamic Database and operators based on STL
+% maps as basis for ISO modules.
+%
+% Revision 1.10 2000/05/14 03:52:31 dennis
+% a5-1-8 replaced ddbatom with atomdb and one 'user' module
+%
+% Revision 1.9 2000/04/21 02:36:59 ray
+%
+% new current_prolog_flags
+%
+% Revision 1.8 2000/04/18 01:25:12 ray
+% Introduced a basis for ISO standard errors, in cmain
+%
+% Revision 1.7 2000/04/01 02:57:48 dennis
+% cleaned up odd reverse in cmain
+%
+% Revision 1.6 2000/03/28 23:47:48 dennis
+% Changed all tabs to three spaces, and also changed Logic Server
+% to use void* for TERM externally and cast to Cell* in LEngine
+% implementation.
+%
+% Revision 1.5 2000/03/28 01:05:14 dennis
+% merged Ray's changes with bigdig. bigdig is at point where
+% new Cell class is used, but there are no modules in the system.
+%
+% Revision 1.3.2.1 2000/02/26 20:56:13 dennis
+% Removed local atoms from compiler, and old module support, so
+% compiler and listener are all global for now. Also made member/2
+% and friends built-ins as well as the bug predicates.
+%
+%
+% cmain indented on 12/5/1999 by 'JOLI' 1.0.
+%
+%----------------------------------------------------------------------
+
+main$ :-
+  amzi_compiler:main.
+
+:- body(amzi_compiler).
+
+unl$defined :-
+  defined(amzi_register:unl$sta/1).
+
+op$en(Status) :-
+  unl$defined, !,
+  unl$sta(Status).
+op$en(i).
+
+exp$date(M, MonName, D, Y) :-
+  unl$defined, !,
+  unl$ctm(M, MonName, D, Y).
+exp$date(_, _, _, _).
+
+/*
+un$lock(FileS, UserS, OrgS, ProdS, KeyS) :-
+  unl$defined, !,
+  unl$rid(FileS, UserS, OrgS, $$, ProdS, KeyS).
+un$lock(_, _, _, _, _).
+*/
+
+who$ami(User, Org, Product, Platform, Version) :-
+  unl$defined, !,
+  unl$gri(User, Org, _, _, _),
+  unl$gid(Product, Platform, Version, _, _).
+who$ami(`System`, `Amzi! inc.`, `APX`, ``, ``).
+
+who$ami(User, Org, Product, Platform, Version, SerialNo) :-
+  unl$defined, !,
+  unl$gri(User, Org, _, _, _),
+  unl$gid(Product, Platform, Version, _, SerialNo).
+who$ami(`System`, `Amzi! inc.`, `APX`, ``, ``, ``).
+
+
+greetings :-
+   version(Ver),
+   write(`\nAmzi! Prolog Compiler `), write(Ver), 
+   write(`\nCopyright (c)1992-2009 Amzi! inc. All Rights Reserved.\n`),
+   nl.
+
+farewells :-
+   op$en(X),
+   greetings(X),
+   true.
+
+greetings(_) :-
+   !,
+   write(`\n  ****************************************************\n`), 
+   amzi_system:license$info(product_type_str, PRODUCT),
+   greetings_product(PRODUCT),
+   write(`  ****************************************************\n`).
+
+greetings_product(P) :-
+   sub_string(P, 3, 1, `_`),
+   This
+   write(`             EVALUATION COPY\n`),
+   write(` Ask your school, company or organization to buy\n`),
+   write(`       an Education or Enterprise license,\n`),
+   write(`         or buy an individual license.\n`),
+   write(`             www.amzi.com\n`).
+greetings_product(TYPE) :-
+   amzi_system:license$info(product_name_str, NAME),
+   amzi_system:license$info(maint_days_left, DAYS),
+   amzi_system:license$info(user_name_str, USER),
+   write(`  `),
+   write(NAME), write(` `), write(`Edition\n`),
+   write(`  Licensed to `), write(USER), nl,
+   (DAYS > 0 ->
+      write(`  Maintenance & Support Expires in `), write(DAYS), write(` days\n`)
+   ;
+      write(`  Maintenance & Support has Expired\n`)
+   ).
+   
+
+/*
+greetings(i) :-
+   !,
+   write(`\n  ****************************************************\n`), 
+   write(`    Internal development version, Amzi! use only.\n`), 
+   write(`****************************************************\n`).
+greetings(l) :-
+   !,
+   write(`\n  ****************************************************\n`), 
+   write(`  This limited free product is licensed for academic,\n`),
+   write(`  personal or 90-day evaluation use (see license\n`),
+   write(`  agreement in docs for details).  To purchase a\n`),
+   write(`  Standard or Professional License, or obtain a\n`),
+   write(`  registered Academic License, e-mail sales@amzi.com.\n`),
+   write(`  ****************************************************\n`).
+greetings(r) :-
+   !,
+   who$ami(User, Org, Prod, Plat, Ver),
+   product_name(Prod, ProdName),
+   write(`\n  ****************************************************\n`),
+   tab(2), write(ProdName), tab(1),
+   write(`licensed version for:\n`),
+   tab(2), write(User), write(`, at `), write(Org), nl,
+   write(`  ****************************************************\n`).
+greetings(t) :-
+   !,
+   who$ami(User, Org, Prod, Plat, Ver),
+   product_name(Prod, ProdName),
+   unl$ctm(XMonth, XMonthName, XDay, XYear),
+   write(`\n  ****************************************************\n`),
+   tab(2), write(ProdName), tab(1),
+   write(`licensed version for:\n`),
+   tab(2), write(User), write(`, at `), write(Org), nl,
+   write(`  Maintenance and support good until: `),
+   write(XYear), tab(1), write(XMonthName), tab(1), write(XDay), nl,
+   write(`  ****************************************************\n`).
+greetings(x) :-
+   !,
+   who$ami(User, Org, Prod, Plat, Ver),
+   product_name(Prod, ProdName),
+   unl$ctm(XMonth, XMonthName, XDay, XYear),
+   write(`\n  ****************************************************\n`), 
+   tab(2), write(ProdName), tab(1),
+   write(`licensed version for:\n`),
+   tab(2), write(User), write(`, at `), write(Org), nl,
+   write(`  Maintenance has expired!  Contact Amzi! to renew.`),
+   write(`  ****************************************************\n`).
+*/
+
+product_name('APS', `Developer`).
+product_name('APX', `Professional`).
+product_name('AP1', `Student`).
+
+/*
+main :-
+  op$en(Status),
+  ((Status = l ;  Status = x) -> faulty$tower ;  true),
+  who$ami(_, _, _, _, Ver),
+  (Ver = $4.1$ -> true ;  faulty$tower),
+  banner(Status), !,
+  startmain.
+*/
+
+main :-
+   greetings,
+   startmain,
+   farewells.
+
+% catch(startmain, X, process_exception(X)).
+
+startmain :-
+  user_inputs(Files, Options), 
+  doit(Files, Options).
+
+compile_file(FStr) :-
+%  op$en(Status),
+%  ((Status = l ;  Status = x) -> faulty$tower ;  true),
+%  who$ami(_, _, _, _, Ver),
+%  (Ver = $4.1$ -> true ;  faulty$tower),
+%  banner(Status),
+  greetings,
+  string_list(FStr, FChl),
+  catch(startcompile(FChl), X, process_exception(X)),
+  farewells.
+
+startcompile(FChl) :-
+  opts_n_files(Options, Files, [FChl], []),
+  apply_defaults(Files, [S, O, L]),
+  doit([S, O, L], Options).
+
+process_exception(comperr(E, Arg)) :-         % errors thrown by the compiler
+  write($Compiler Error: $), 
+  error_message(E, Arg), !,
+  fail.
+process_exception(comperr(E)) :-              % errors thrown by the compiler
+  write($Compiler Error: $), 
+  error_message(E), !,
+  fail.
+process_exception(amzierror(Err, Attrs)) :-   % errors thrown by the system
+  write($Error During Compilation: $), 
+  member(rc = RC, Attrs),
+  member(type = TYPE, Attrs),
+  member(message = MSG, Attrs),
+  write(Err), tab(1), write(RC), nl, write(MSG), nl, 
+  (
+     TYPE == read ->
+     member(read_buffer = RB, Attrs),
+     write($Read buffer:\n$), write(RB), nl ;
+
+     true
+  ), !,
+  fail.
+process_exception(error(Error_term, Imp_def)) :- % ISO standard format
+  isoError(Error_term, Imp_def),  %stream_attrs(AttrList), % available to user
+                                              %stream$attrs(AttrList),
+  fail.
+process_exception(E) :-
+  write($Exit with $), writeq(E), nl, 
+  fail.
+
+stream$attrs([]).
+stream$attrs([stream(Kind, Name, Lino, Col)|Rest]) :- % recurse thru readers
+  write(stream(Kind)), tab(1), write(Name),   % write stream attributes 
+  write($ line: $), write(Lino), write($ column: $), write(Col), nl, 
+  stream$attrs(Rest).
+
+error_message(earlyop) :-
+  errout($Must define imports and exports before any operators.$).
+error_message(codetoolong) :-
+  errout($This predicate is too big. Split the clauses into separate predicates.$).
+error_message(atomstoolong) :-
+  errout($This predicate's atom table is too long. Use strings where practical.$).
+error_message(STRING) :-
+  errout(STRING),
+  nl.
+
+error_message(badfilename, FileName) :-
+  errout($Bad file name: $),
+  errout(FileName),
+  nl.
+error_message(badglobal, X) :-
+  errout($Bad import/export specification: $),
+  errout(X),
+  nl.
+error_message(STRING, ARG) :-
+  errout(STRING),
+  errout(ARG),
+  nl.
+
+errout(X) :-
+  write(X).
+
+isoError(type_error(ValidType, Culprit), Imp_def) :-
+  write($type error: $), write(Culprit), write($ is not $), 
+  write(ValidType), nl.
+isoError(domain_error(ValidDomain, Culprit), Imp_def) :-
+  write($domain error: $), write(Culprit), write($ is not $), 
+  write(ValidDomain), nl.
+isoError(existence_error(ObjectType, Culprit), Imp_def) :-
+  write($existence error: $), write(ObjectType), tab(1), write(Culprit), 
+  write($ does not exist $), nl.
+isoError(permission_error(Operation, ObjectType, Culprit), Imp_def) :-
+  write($permission error: $), write(Culprit), 
+  write($ does not have permission to $), write(Operation), write($ on $), 
+  write(ObjectType), nl.
+isoError(representation_error(Flag), Imp_def) :-
+  write($representation error: $), write(Flag), nl.
+isoError(calculation_error(Error), Imp_def) :-
+  write($calculation error: $), write(Error), nl.
+isoError(resource_error(Resource), Imp_def) :-
+  write($resource error: $), write(Resource), nl.
+isoError(instantiation_error, Imp_def) :-
+  write($instantiation error\n$).
+isoError(syntax_error, Imp_def) :-
+  write($syntax error: $), nl.
+isoError(system_error, Imp_def) :-
+  write($system error: $), nl.
+
+% files are the files on the command line or read in, .pro, .plm, .pal
+% options are the letters of each of the options
+%doit([S|_], Options) :- 
+                              %(member(p, Options) ; member('P', Options)), !,
+                                              %proof(S).
+
+doit([S, O, L], Options) :-                   %(retractall(wamout(_)) ; true),
+  % (retractall(wamout(_)) ;  true),
+  abolish(wamout/1),
+  set_options([S, O, L], [S2, O2, L2], Options),
+  (L2 = null, retractall(list_on) ;  assert(list_on)), !, % flow(compile),
+  (debug64_compile ->
+     nl, write('*** debugging ***'), nl, nl,
+     debug_compile(S2, O2, L2)
+     ;
+     compile(S2, O2, L2) ).
+
+set_options(Fs, Fs, []).
+set_options(Fs, FFs, [O|Os]) :-
+
+% write($setting option -$ : O), nl, 
+  set_opt(Fs, F2s, O),
+  set_options(F2s, FFs, Os).
+
+set_opt(X, X, d) :-
+  assert(debug64_compile).
+set_opt([S|X], [S|X], a) :-
+  add_wamout(S).
+set_opt([S|X], [S|X], 'A') :-
+  add_wamout(S).
+set_opt([S, O, user], [S, O, null], nol) :- !.
+set_opt(Fs, Fs, _).
+
+add_wamout(S) :-
+  atom_codes(S, Sx),
+  file_name_ext(Sx, Rootx, _),
+  append(Rootx, ".wam", Namex),
+  atom_codes(N, Namex),
+  assert(wamout(N)).
+
+user_inputs(Files, Options) :-
+  get_command_line(C),                        % list of lists
+  opts_n_files(Options, Fs, C, []),
+  just_help(Options),
+  (Fs = [], prompt_for_files(Fils) ;  Fils = Fs),
+  apply_defaults(Fils, Files), !.
+
+get_command_line(L) :-
+  command_line(L), !.
+get_command_line([]).
+
+% note there is a problem with 'char' and 'int'
+% notations for characters, don't always line up
+% right, so this name('-', DASH) is a kludge
+% to fix it for now. Same with DOT below.
+
+opts_n_files([O|Os], Fs) -->
+  {atom_codes('-', [DASH])},
+
+% ([[0'-|X]] ; [[0'/|X]]),
+  [[DASH|X]],
+  {atom_codes(O, X)},
+  opts_n_files(Os, Fs).
+opts_n_files(Os, [F|Fs]) -->
+  [X],
+  {filename(F, X, [])},                       % cons file list
+  opts_n_files(Os, Fs).
+opts_n_files([], []) --> [].
+
+filename(file(Name, Ext), FullName, L) :-
+  reverse(FullName, FullRName),
+  filername(file(RName, RExt), FullRName, L),
+  (nonvar(RName), reverse(RName, Name) ;  true),
+  string_list(S2, Name),
+  (nonvar(RExt) -> reverse(RExt, Ext) ;  true).
+filename(_, X, _) :-
+  string_list(S, X),
+  throw(comperr(badfilename, S)).
+filename(_, X, _) :-
+  throw(comperr(badfilename, X)).
+
+% note there is a problem with 'char' and 'int'
+% notations for characters, don't always line up
+% right, so this name('.', DOT) is a kludge
+% to fix it for now. Same with DASH above.
+
+filername(file(Name, Ext)) -->
+  extchars(Ext),
+  {atom_codes('.', [DOT])},
+  [DOT],
+  chars(Name),
+  {listlen(Ext, L), L =< 3}.
+filername(file(Name, _)) -->
+  chars(Name).
+filername(file(_, _)) --> [].
+
+extchars([C|Cs]) -->
+  extchar(C),
+  extchars(Cs).
+extchars([C]) -->
+  extchar(C).
+
+extchar(C) -->
+  [C],
+  {C >= 0'a, C =< 0'z}.
+extchar(C) -->
+  [C],
+  {C >= 0'A, C =< 0'Z}.
+extchar(C) -->
+  [C],
+  {C >= 0'0, C =< 0'9}.
+
+chars([C|Cs]) -->
+  char(C),
+  chars(Cs).
+chars([C]) -->
+  char(C).
+
+%char(C) --> [C], {C >= 0'a, C =< 0'z}.
+%char(C) --> [C], {C >= 0'A, C =< 0'Z}.
+%char(C) --> [C], {C >= 0'0, C =< 0'9}.
+% These are the long file name rules for NT, all characters are OK except
+% for the ones listed here. / \ : are also illegal in file names but are
+% legal in directory names so they are allowed here.
+
+char(C) -->
+  [C],
+  {member(C, [0'?, 0'", 0'<, 0'>, 0'*, 0'|]), !, fail}.
+char(C) -->
+  [C].
+
+just_help([]).
+just_help(['?'|Os]) :-
+  about_compiler.
+just_help([_|Os]) :-
+  just_help(Os).
+
+about_compiler :-
+  write($Usage: $), 
+  write($a5cmp <-a> <filename><.PRO> <filename><.PLM> <filename><.PAL> \n$), 
+  write($  .PRO is the source file\n$), 
+  write($  .PLM is the generated object file\n$), 
+  write($  .PAL is an optional file echoing the compiler messages\n$), 
+  write($  only the filename need be given, e.g. a5cmp foo\n$), 
+  write($  if no arguments are given, acmp will prompt for them\n$), 
+  write($\n$), 
+  write($  option -a generates listing of WAM codes in <filename>.WAM \n$), 
+  halt.
+
+prompt_for_files([file(SrcName, SrcExt), Object, Listing]) :-
+  write($\nSource Code [.PRO]: $), 
+  read_fname(file(SrcName, SrcExt)),
+  (var(SrcName) -> throw(comperr(badfilename, SrcName)) ;  true),
+  atom_codes(SourceName, SrcName),
+  write($Object Code [$), write(SourceName), write($.PLM]: $), 
+  read_fname(Object),
+  write($Listing File [NULL.PAL]: $), 
+  read_fname(Listing).
+
+read_fname(F) :-
+  read_string(S),
+  (S == $$ -> F = file(_, _) ;  string_list(S, L), filename(F, L, [])).
+
+apply_defaults(Fils, [Source, Object, Listing]) :-
+  fillout(Fils, FO),
+  FO = [file(S, Sx), file(O, Ox), file(L, Lx)],
+  (var(Sx), Sx = "pro" ;  true),
+  (var(O), O = S ;  true),
+  (var(Ox), Ox = "plm" ;  true),
+  concat_lists([S, ".", Sx], Src),
+  atom_codes(Source, Src),
+  concat_lists([O, ".", Ox], Obj),
+  atom_codes(Object, Obj),
+  (
+     var(L),
+     Listing = user ;
+
+     (var(Lx), Lx = "pal" ;  true),
+     concat_lists([L, ".", Lx], Lst),
+     atom_codes(Listing, Lst)
+  ), !.
+
+fillout([S], [S, file(_, _), file(_, _)]).
+fillout([S, O], [S, O, file(_, _)]).
+fillout(X, X).
+
+concat_lists([One, Two], Result) :-
+  append(One, Two, Result).
+concat_lists([One, Two|Rest], Result) :-
+  append(One, Two, X),
+  concat_lists([X|Rest], Result).
+
+pip(L, Pre, Inf, Post) :-
+  append(L1, Post, L),
+  append(Pre, Inf, L1).
+
+file_name_ext(S, Pre, Post) :-
+  pip(S, Pre, ".", Post), !.
+file_name_ext(S, S, []).
+
+listlen(L, N) :-
+  llen(L, 0, N).
+
+llen([], N, N).
+llen([A|Y], X, N) :-
+  XX is X + 1,
+  llen(Y, XX, N).
+
+% report/1 is used in other compiler modules so that there
+% isn't a write/1 compiled, so that it can be used in embedded
+% applications, such as from VB.
+
+report(X) :-
+  write(X).
+
+:- end_body(amzi_compiler).
+
