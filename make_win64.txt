@@ -1,32 +1,18 @@
 .SUFFIXES: .plm .pro
 
-OBJECTS = register.plm assemb.plm builtins.plm cclause.plm cmain.plm compile.plm writeplm.plm reader.plm
-ALIB = $(AMZI_DEV_DIR)\abin\alib.plm
-ACMP = $(AMZI_DEV_DIR)\abin\acmp.xpl
-UNLOCK = $(AMZI_DEV_DIR)\abin\unlock.xpl
-
-SRC_LIB = $(AMZI_DEV_DIR)\src\acore\libs
+OBJECTS = assemb.plm builtins.plm cclause.plm cmain.plm compile.plm writeplm.plm reader.plm
+ALIB = $(APLS_RELEASE)\abin\alib.plm
+ACMP = $(APLS_RELEASE)\abin\acmp.xpl
 
 all: $(ACMP)
 
-alib: alib.plm
-	copy alib.plm $(ALIB)
-
-link:
-	alnk acmp $(OBJECTS)
-
-   
 .pro.plm:
 	acmp $<
 
 $(ACMP) : alib.plm $(OBJECTS)
 	alnk acmp $(OBJECTS)
 	copy acmp.xpl $(ACMP)
-	copy alib.plm $(ALIB)	
-
-unlock: register.plm unlock.plm $(SRC_LIB)\date_time.plm
-	alnk unlock unlock register $(SRC_LIB)\date_time
-	copy unlock.xpl $(UNLOCK)
+	copy alib.plm $(ALIB)
 
 clean :
 	-del /Q *.plm
